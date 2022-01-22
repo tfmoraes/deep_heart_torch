@@ -33,7 +33,8 @@ ignore = ["ID00052637202186188008618"]
 
 def read_nrrd_to_ndarray(filename: pathlib.Path) -> np.ndarray:
     _nrrd = nrrd.read(filename)
-    return np.array(np.swapaxes(_nrrd[0], 0, 2))
+    arr = np.array(np.swapaxes(_nrrd[0], 0, 2)[::-1])
+    return arr
 
 
 def save_to_nii(data: np.ndarray, filename: str):
@@ -50,7 +51,6 @@ def main():
     args, _ = parser.parse_known_args()
     input_folder = args.input_folder.absolute()
     output_folder = args.output_folder.absolute()
-
     for nrrd_filename in input_folder.iterdir():
         data = read_nrrd_to_ndarray(nrrd_filename)
         nii_filename = output_folder.joinpath(nrrd_filename.name.split('_')[0], "mask.nii.gz")
