@@ -30,14 +30,36 @@
           pypiDataSha256 = pypi-deps-db.narHash;
         };
 
-        my_python = mach-nix-utils.mkPython {
-          requirements = (builtins.readFile ./requirements.txt) + ''
-            ipython
-            mypy
-            setuptools_rust
-            cffi
-          '';
-        };
+        my_python = mach-nix-utils.mkPython
+          {
+            requirements = (builtins.readFile ./requirements.txt) + ''
+              ipython
+              mypy
+              setuptools_rust
+              cffi
+            '';
+            _.kaggle.pythonImportsCheckPhase = ''
+                      echo "manolo safado"
+                        export HOME="$TMP"
+                        mkdir -p "$HOME/.kaggle/"
+                        echo '{"username":"foobar","key":"00000000000000000000000000000000"}' > "$HOME/.kaggle/kaggle.json"
+                        $out/bin/kaggle --help > /dev/null
+            '';
+            # overridesPost = [
+            #   (pythonSelf: pythonSuper: {
+            #     kaggle = pythonSuper.kaggle.overridePythonAttrs
+            #       (oldAttrs: {
+            #         pythonImportsCheckPhase = ''
+            #           echo "manolo safado"
+            #             export HOME="$TMP"
+            #             mkdir -p "$HOME/.kaggle/"
+            #             echo '{"username":"foobar","key":"00000000000000000000000000000000"}' > "$HOME/.kaggle/kaggle.json"
+            #             $out/bin/kaggle --help > /dev/null
+            #         '';
+            #       });
+            #   })
+            # ];
+          };
         gpu_libs = with pkgs; [
           cudatoolkit_11
           cudnn_cudatoolkit_11
@@ -45,7 +67,7 @@
       in
       {
         devShell = pkgs.mkShell {
-          name = "manolo_deeptrachea_torch";
+          name = "deep_heart_torch";
           buildInputs = with pkgs; [
             my_python
           ] ++ gpu_libs;
