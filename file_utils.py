@@ -3,13 +3,16 @@ import sys
 import typing
 
 
-def get_trachea_files(
+def get_files(
     base_folder: pathlib.Path,
 ) -> typing.List[typing.Tuple[pathlib.Path, pathlib.Path]]:
     files = []
-    for nii_folder in base_folder.iterdir():
-        image_filename = nii_folder.joinpath("image.nii.gz")
+    images_folder = base_folder.joinpath("images/nii")
+    masks_folder = base_folder.joinpath("masks/nii")
+    for nii_folder in masks_folder.iterdir():
         mask_filename = nii_folder.joinpath("mask.nii.gz")
+        image_filename = images_folder.joinpath(f"{nii_folder.name}/image.nii.gz")
+        print(mask_filename, image_filename)
         if image_filename.exists() and mask_filename.exists():
             files.append((image_filename, mask_filename))
     return files

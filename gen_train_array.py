@@ -202,9 +202,9 @@ def main():
     # deeptrache_folder = pathlib.Path("datasets").resolve()
     # files = file_utils.get_lidc_filenames(deeptrache_folder)
 
-    trachea_files = file_utils.get_trachea_files(deeptrache_folder)
+    heart_files = file_utils.get_files(deeptrache_folder)
 
-    patches_files = gen_all_patches(trachea_files)
+    patches_files = gen_all_patches(heart_files)
     # random.shuffle(patches_files)
 
     # training_files = patches_files[: int(len(patches_files) * 0.80)]

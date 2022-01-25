@@ -164,8 +164,8 @@ def train():
         model = nn.DataParallel(model)
     model.to(dev)
 
-    image_test = nb.load("datasets/ID00073637202198167792918/image.nii.gz").get_fdata()
-    mask_test = nb.load("datasets/ID00073637202198167792918/mask.nii.gz").get_fdata()
+    image_test = nb.load("datasets/images/nii/ID00073637202198167792918/image.nii.gz").get_fdata()
+    mask_test = nb.load("datasets/masks/nii/ID00073637202198167792918/mask.nii.gz").get_fdata()
 
     writer.add_image("Groundtruth View 1", np.expand_dims(mask_test.max(0), 0), 0)
     writer.add_image("Groundtruth View 2", np.expand_dims(mask_test.max(1), 0), 0)
