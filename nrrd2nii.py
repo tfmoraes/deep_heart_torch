@@ -33,7 +33,7 @@ ignore = ["ID00052637202186188008618"]
 
 def read_nrrd_to_ndarray(filename: pathlib.Path) -> np.ndarray:
     _nrrd = nrrd.read(filename)
-    arr = np.array(np.swapaxes(_nrrd[0], 0, 2)[::-1])
+    arr = np.array(np.swapaxes(_nrrd[0], 0, 2))
     return arr
 
 
