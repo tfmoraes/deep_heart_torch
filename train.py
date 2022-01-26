@@ -4,6 +4,7 @@ import shutil
 import typing
 
 import h5py
+import matplotlib.pyplot as plt
 import nibabel as nb
 import numpy as np
 import torch
@@ -118,6 +119,16 @@ def calc_accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> float:
         return acc
 
 
+def plot_images_comparison(image1, image2):
+    fig = plt.figure()
+    fig.add_subplot(1, 3, 1)
+    plt.imshow(image1)
+    fig.add_subplot(1, 3, 2)
+    plt.imshow(image2)
+    fig.add_subplot(1, 3, 3)
+    plt.imshow(image1 - image2)
+    return fig
+
 class HDF5Sequence:
     def __init__(self, filename: str, batch_size: int):
         self.f_array = h5py.File(filename, "r")
@@ -164,12 +175,19 @@ def train():
         model = nn.DataParallel(model)
     model.to(dev)
 
-    image_test = nb.load("datasets/images/nii/ID00073637202198167792918/image.nii.gz").get_fdata()
-    mask_test = nb.load("datasets/masks/nii/ID00073637202198167792918/mask.nii.gz").get_fdata()
+    image_test = nb.load(
+        "datasets/images/nii/ID00073637202198167792918/image.nii.gz"
+    ).get_fdata()
+    mask_test = nb.load(
+        "datasets/masks/nii/ID00073637202198167792918/mask.nii.gz"
+    ).get_fdata()
 
-    writer.add_image("Groundtruth View 1", np.expand_dims(mask_test.max(0), 0), 0)
-    writer.add_image("Groundtruth View 2", np.expand_dims(mask_test.max(1), 0), 0)
-    writer.add_image("Groundtruth View 3", np.expand_dims(mask_test.max(2), 0), 0)
+    # writer.add_image("Groundtruth View 1", np.expand_dims(mask_test.max(0), 0), 0)
+    # writer.add_image("Groundtruth View 2", np.expand_dims(mask_test.max(1), 0), 0)
+    # writer.add_image("Groundtruth View 3", np.expand_dims(mask_test.max(2), 0), 0)
+    groundtruth_image_1 = mask_test.max(0)
+    groundtruth_image_2 = mask_test.max(1)
+    groundtruth_image_3 = mask_test.max(2)
 
     training_files_gen = HDF5Sequence("train_arrays.h5", args.batch_size)
     testing_files_gen = HDF5Sequence("test_arrays.h5", args.batch_size)
@@ -249,9 +267,16 @@ def train():
         writer.add_scalar("Loss validation", np.mean(losses["validate"]), epoch)
         writer.add_scalar("Accuracy validation", np.mean(accuracies["validate"]), epoch)
 
-        writer.add_image("View 1", output_test.max(0).reshape(1, dy, dx), epoch)
-        writer.add_image("View 2", output_test.max(1).reshape(1, dz, dx), epoch)
-        writer.add_image("View 3", output_test.max(2).reshape(1, dz, dy), epoch)
+        output_image_1 = output_test.max(0)
+        output_image_2 = output_test.max(1)
+        output_image_3 = output_test.max(2)
+
+        # writer.add_image("View 1", output_test.max(0).reshape(1, dy, dx), epoch)
+        # writer.add_image("View 2", output_test.max(1).reshape(1, dz, dx), epoch)
+        # writer.add_image("View 3", output_test.max(2).reshape(1, dz, dy), epoch)
+        writer.add_figure("Comparison 1", plot_images_comparison(groundtruth_image_1, output_image_1), epoch)
+        writer.add_figure("Comparison 2", plot_images_comparison(groundtruth_image_2, output_image_2), epoch)
+        writer.add_figure("Comparison 3", plot_images_comparison(groundtruth_image_3, output_image_3), epoch)
 
         if actual_loss <= best_loss:
             best_loss = actual_loss
